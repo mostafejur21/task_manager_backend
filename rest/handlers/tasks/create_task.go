@@ -22,10 +22,11 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJsonError(w, http.StatusBadRequest, err.Error())
 	}
 
+	status := "in-progress"
 	createTask, err := h.srv.Create(domain.Task{
-		Title: req.Title,
+		Title:       req.Title,
 		Description: req.Description,
-		Status: "in-progress",
+		Status:      &status,
 	})
 
 	if err != nil {

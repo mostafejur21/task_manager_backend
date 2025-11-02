@@ -31,8 +31,7 @@ func Serve() {
 	//5. handler
 	taskHandler := tasks.NewHandler(taskSvc)
 
-	server := rest.NewServer(cnf, taskHandler)
+	server := rest.NewServer(cnf, taskHandler, logger)
 
 	server.Start()
 }
-

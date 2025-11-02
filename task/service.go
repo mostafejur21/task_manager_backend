@@ -10,13 +10,16 @@ func NewService(taskRepo TaskRepo) Service {
 	return &service{taskRepo: taskRepo}
 }
 
-
 func (srv *service) Create(t domain.Task) (*domain.Task, error) {
 	return srv.taskRepo.Create(t)
 }
 
 func (srv *service) Get(id int) (*domain.Task, error) {
 	return srv.taskRepo.Get(id)
+}
+
+func (srv *service) GetByStatus(status string) ([]*domain.Task, error) {
+	return srv.taskRepo.GetByStatus(status)
 }
 
 func (srv *service) List(page, limit int64) ([]*domain.Task, error) {
