@@ -2,7 +2,9 @@ package repo
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mostafejur21/task_manager_backend/domain"
@@ -109,8 +111,46 @@ func (r *taskRepo) List(page, limit int64) ([]*domain.Task, error) {
 }
 
 func (r *taskRepo) Delete(id int) error {
+	query := `
+	DELETE FROM tasks WHERE id=$1
+`
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
-func (r *taskRepo) Update(domain.Task) (*domain.Task, error) {
-	return nil, nil
+func (r *taskRepo) Update(t domain.Task) (*domain.Task, error) {
+	setClauses := []string{}
+	args := []interface{}{}
+	i := 1
+
+	if t.Title != "" {
+		setClauses = append(setClauses, fmt.Sprintf("title=$%d", i))
+		args = append(args, t.Title)
+		i++
+	}
+
+	if t.Description != "" {
+		setClauses = append(setClauses, fmt.Sprintf("description=$%d", i))
+		args = append(args, t.Description)
+		i++
+
+	}
+	if t.Status != nil {
+		setClauses = append(setClauses, fmt.Sprintf("status=$%d", i))
+		args = append(args, t.Status)
+		i++
+	}
+	if len(setClauses) == 0 {
+		return nil, errors.New("no fields to update")
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE tasks SET %s WHERE id=$%d", strings.Join(setClauses, ","), i,
+	)
+	args = append(args, t.ID)
+	_, err := r.db.Exec(query, args...)
+
+	return &t, err
 }
