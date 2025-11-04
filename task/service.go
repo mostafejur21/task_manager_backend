@@ -18,8 +18,8 @@ func (srv *service) Get(id int) (*domain.Task, error) {
 	return srv.taskRepo.Get(id)
 }
 
-func (srv *service) GetByStatus(status string) ([]*domain.Task, error) {
-	return srv.taskRepo.GetByStatus(status)
+func (srv *service) GetByStatus(status string, page, limit int64) ([]*domain.Task, error) {
+	return srv.taskRepo.GetByStatus(status, page, limit)
 }
 
 func (srv *service) List(page, limit int64) ([]*domain.Task, error) {

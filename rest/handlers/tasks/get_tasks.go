@@ -12,6 +12,7 @@ func (h *Handler) GetTasks(w http.ResponseWriter, r *http.Request) {
 
 	pageAsstr := reqQuery.Get("page")
 	limitAsstr := reqQuery.Get("limit")
+	status := reqQuery.Get("status")
 
 	page, _ := strconv.Atoi(pageAsstr)
 	limit, _ := strconv.Atoi(limitAsstr)
@@ -23,10 +24,19 @@ func (h *Handler) GetTasks(w http.ResponseWriter, r *http.Request) {
 		limit = 10
 	}
 
-	taskList, err := h.srv.List(int64(page), int64(limit))
-	if err != nil {
-		utils.WriteJsonError(w, http.StatusInternalServerError, "Internal server error")
-	}
+	if status != "" {
+		taskList, err := h.srv.GetByStatus(status, int64(page), int64(limit))
+		if err != nil {
+			utils.WriteJsonError(w, http.StatusInternalServerError, "Internal server error")
+		}
+		utils.JsonResponse(w, http.StatusOK, taskList)
+	} else {
 
-	utils.JsonResponse(w, http.StatusOK, taskList)
+		taskList, err := h.srv.List(int64(page), int64(limit))
+		if err != nil {
+			utils.WriteJsonError(w, http.StatusInternalServerError, "Internal server error")
+		}
+
+		utils.JsonResponse(w, http.StatusOK, taskList)
+	}
 }

@@ -63,8 +63,27 @@ func (r *taskRepo) Get(id int) (*domain.Task, error) {
 	return &task, nil
 }
 
-func (r *taskRepo) GetByStatus(status string) ([]*domain.Task, error) {
-	return nil, nil
+func (r *taskRepo) GetByStatus(status string, page, limit int64) ([]*domain.Task, error) {
+	offset := (page - 1) * limit
+	var task []*domain.Task
+	query := `
+	SELECT
+		id,
+		title,
+		description,
+		status,
+		created_at
+	FROM tasks
+	WHERE status IS NOT NULL
+		AND LOWER(TRIM(status)) = LOWER(TRIM($1))
+	ORDER BY id ASC
+	LIMIT $2 OFFSET $3
+`
+	if err := r.db.Select(&task, query, status, limit, offset); err != nil {
+		return nil, err
+	}
+
+	return task, nil
 }
 
 func (r *taskRepo) List(page, limit int64) ([]*domain.Task, error) {
