@@ -8,6 +8,7 @@ import (
 
 	"github.com/mostafejur21/task_manager_backend/config"
 	"github.com/mostafejur21/task_manager_backend/rest/handlers/tasks"
+	"github.com/mostafejur21/task_manager_backend/rest/middlewares"
 	"go.uber.org/zap"
 )
 
@@ -30,14 +31,18 @@ func NewServer(
 }
 
 func (s *Server) Start() {
-	mux := http.NewServeMux()
+	manager := middlewares.NewManager()
+	manager.Use(middlewares.Preflight, middlewares.Cors, middlewares.Logger)
 
-	s.taskHandler.RegisterRoutes(mux)
+	mux := http.NewServeMux()
+	wrappedMux := manager.WrapMux(mux)
+
+	s.taskHandler.RegisterRoutes(mux, manager)
 
 	addr := ":" + strconv.Itoa(s.cnf.Port)
 	fmt.Println("Starting the server at port: ", addr)
 
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := http.ListenAndServe(addr, wrappedMux); err != nil {
 		fmt.Println("Error starting server: ", err)
 		os.Exit(1)
 	}
