@@ -8,6 +8,7 @@ import (
 
 	"github.com/mostafejur21/task_manager_backend/config"
 	"github.com/mostafejur21/task_manager_backend/rest/handlers/tasks"
+	"github.com/mostafejur21/task_manager_backend/rest/handlers/user"
 	"github.com/mostafejur21/task_manager_backend/rest/middlewares"
 	"go.uber.org/zap"
 )
@@ -15,17 +16,20 @@ import (
 type Server struct {
 	cnf         *config.Config
 	taskHandler *tasks.Handler
+	userHandler *user.Handler
 	loggers     *zap.SugaredLogger
 }
 
 func NewServer(
 	cnf *config.Config,
 	taskHandler *tasks.Handler,
+	userHandler *user.Handler,
 	logger *zap.SugaredLogger,
 ) *Server {
 	return &Server{
 		cnf:         cnf,
 		taskHandler: taskHandler,
+		userHandler: userHandler,
 		loggers:     logger,
 	}
 }
@@ -37,7 +41,9 @@ func (s *Server) Start() {
 	mux := http.NewServeMux()
 	wrappedMux := manager.WrapMux(mux)
 
+	// handler register
 	s.taskHandler.RegisterRoutes(mux, manager)
+	s.userHandler.RegisterRoutes(mux, manager)
 
 	addr := ":" + strconv.Itoa(s.cnf.Port)
 	fmt.Println("Starting the server at port: ", addr)
